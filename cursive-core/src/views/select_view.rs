@@ -54,11 +54,11 @@ pub struct SelectView<T = String> {
 
     // This is a custom callback to include a &T.
     // It will be called whenever "Enter" is pressed or when an item is clicked.
-    on_submit: Option<Rc<dyn Fn(&mut Cursive, &T)>>,
+    on_submit: Option<Rc<dyn Fn(&mut Cursive<UserData>, &T)>>,
 
     // This callback is called when the selection is changed.
     // TODO: add the previous selection? Indices?
-    on_select: Option<Rc<dyn Fn(&mut Cursive, &T)>>,
+    on_select: Option<Rc<dyn Fn(&mut Cursive<UserData>, &T)>>,
 
     // If `true`, when a character is pressed, jump to the next item starting
     // with this character.
@@ -133,7 +133,7 @@ impl<T: 'static> SelectView<T> {
     /// Sets a callback to be used when an item is selected.
     pub fn set_on_select<F>(&mut self, cb: F)
     where
-        F: Fn(&mut Cursive, &T) + 'static,
+        F: Fn(&mut Cursive<UserData>, &T) + 'static,
     {
         self.on_select = Some(Rc::new(cb));
     }
@@ -169,7 +169,7 @@ impl<T: 'static> SelectView<T> {
     /// ```
     pub fn on_select<F>(self, cb: F) -> Self
     where
-        F: Fn(&mut Cursive, &T) + 'static,
+        F: Fn(&mut Cursive<UserData>, &T) + 'static,
     {
         self.with(|s| s.set_on_select(cb))
     }
@@ -183,7 +183,7 @@ impl<T: 'static> SelectView<T> {
     /// Here, `V` can be `T` itself, or a type that can be borrowed from `T`.
     pub fn set_on_submit<F, R, V: ?Sized>(&mut self, cb: F)
     where
-        F: 'static + Fn(&mut Cursive, &V) -> R,
+        F: 'static + Fn(&mut Cursive<UserData>, &V) -> R,
         T: Borrow<V>,
     {
         self.on_submit = Some(Rc::new(move |s, t| {
@@ -220,7 +220,7 @@ impl<T: 'static> SelectView<T> {
     /// ```
     pub fn on_submit<F, V: ?Sized>(self, cb: F) -> Self
     where
-        F: Fn(&mut Cursive, &V) + 'static,
+        F: Fn(&mut Cursive<UserData>, &V) + 'static,
         T: Borrow<V>,
     {
         self.with(|s| s.set_on_submit(cb))
@@ -584,7 +584,7 @@ impl<T: 'static> SelectView<T> {
     /// ```rust
     /// # use cursive_core::Cursive;
     /// # use cursive_core::views::SelectView;
-    /// fn select_up(siv: &mut Cursive, view: &mut SelectView<()>) {
+    /// fn select_up(siv: &mut Cursive<UserData>, view: &mut SelectView<()>) {
     ///     let cb = view.select_up(1);
     ///     cb(siv);
     /// }

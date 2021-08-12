@@ -16,12 +16,12 @@ use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 ///
 /// Arguments are the `Cursive`, current content of the input and cursor
 /// position
-pub type OnEdit = dyn Fn(&mut Cursive, &str, usize);
+pub type OnEdit = dyn Fn(&mut Cursive<UserData>, &str, usize);
 
 /// Closure type for callbacks when Enter is pressed.
 ///
 /// Arguments are the `Cursive` and the content of the input.
-pub type OnSubmit = dyn Fn(&mut Cursive, &str);
+pub type OnSubmit = dyn Fn(&mut Cursive<UserData>, &str);
 
 /// Input box where the user can enter and edit text.
 ///
@@ -60,7 +60,7 @@ pub type OnSubmit = dyn Fn(&mut Cursive, &str);
 ///         }),
 /// );
 ///
-/// fn show_popup(s: &mut Cursive, name: &str) {
+/// fn show_popup(s: &mut Cursive<UserData>, name: &str) {
 ///     if name.is_empty() {
 ///         s.add_layer(Dialog::info("Please enter a name!"));
 ///     } else {
@@ -218,7 +218,7 @@ impl EditView {
     /// recursive calls, see [`set_on_edit`](#method.set_on_edit).
     pub fn set_on_edit_mut<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Cursive, &str, usize) + 'static,
+        F: FnMut(&mut Cursive<UserData>, &str, usize) + 'static,
     {
         self.set_on_edit(immut3!(callback));
     }
@@ -235,7 +235,7 @@ impl EditView {
     /// aspect, see [`set_on_edit_mut`](#method.set_on_edit_mut).
     pub fn set_on_edit<F>(&mut self, callback: F)
     where
-        F: Fn(&mut Cursive, &str, usize) + 'static,
+        F: Fn(&mut Cursive<UserData>, &str, usize) + 'static,
     {
         self.on_edit = Some(Rc::new(callback));
     }
@@ -245,7 +245,7 @@ impl EditView {
     /// Chainable variant. See [`set_on_edit_mut`](#method.set_on_edit_mut).
     pub fn on_edit_mut<F>(self, callback: F) -> Self
     where
-        F: FnMut(&mut Cursive, &str, usize) + 'static,
+        F: FnMut(&mut Cursive<UserData>, &str, usize) + 'static,
     {
         self.with(|v| v.set_on_edit_mut(callback))
     }
@@ -268,7 +268,7 @@ impl EditView {
     /// ```
     pub fn on_edit<F>(self, callback: F) -> Self
     where
-        F: Fn(&mut Cursive, &str, usize) + 'static,
+        F: Fn(&mut Cursive<UserData>, &str, usize) + 'static,
     {
         self.with(|v| v.set_on_edit(callback))
     }
@@ -284,7 +284,7 @@ impl EditView {
     /// recursive calls, see [`set_on_submit`](#method.set_on_submit).
     pub fn set_on_submit_mut<F>(&mut self, callback: F)
     where
-        F: FnMut(&mut Cursive, &str) + 'static,
+        F: FnMut(&mut Cursive<UserData>, &str) + 'static,
     {
         // TODO: don't duplicate all those methods.
         // Instead, have some generic function immutify()
@@ -308,7 +308,7 @@ impl EditView {
     /// aspect, see [`set_on_submit_mut`](#method.set_on_submit_mut).
     pub fn set_on_submit<F>(&mut self, callback: F)
     where
-        F: Fn(&mut Cursive, &str) + 'static,
+        F: Fn(&mut Cursive<UserData>, &str) + 'static,
     {
         self.on_submit = Some(Rc::new(callback));
     }
@@ -318,7 +318,7 @@ impl EditView {
     /// Chainable variant.
     pub fn on_submit_mut<F>(self, callback: F) -> Self
     where
-        F: FnMut(&mut Cursive, &str) + 'static,
+        F: FnMut(&mut Cursive<UserData>, &str) + 'static,
     {
         self.with(|v| v.set_on_submit_mut(callback))
     }
@@ -338,7 +338,7 @@ impl EditView {
     /// ```
     pub fn on_submit<F>(self, callback: F) -> Self
     where
-        F: Fn(&mut Cursive, &str) + 'static,
+        F: Fn(&mut Cursive<UserData>, &str) + 'static,
     {
         self.with(|v| v.set_on_submit(callback))
     }
@@ -347,7 +347,7 @@ impl EditView {
     ///
     /// Returns a callback in response to content change.
     ///
-    /// You should run this callback with a `&mut Cursive`.
+    /// You should run this callback with a `&mut Cursive<UserData>`.
     pub fn set_content<S: Into<String>>(&mut self, content: S) -> Callback {
         let content = content.into();
         let len = content.len();
@@ -386,7 +386,7 @@ impl EditView {
     ///
     /// Returns a callback in response to content change.
     ///
-    /// You should run this callback with a `&mut Cursive`.
+    /// You should run this callback with a `&mut Cursive<UserData>`.
     pub fn insert(&mut self, ch: char) -> Callback {
         // First, make sure we can actually insert anything.
         if let Some(width) = self.max_content_width {
@@ -416,7 +416,7 @@ impl EditView {
     ///
     /// Returns a callback in response to content change.
     ///
-    /// You should run this callback with a `&mut Cursive`.
+    /// You should run this callback with a `&mut Cursive<UserData>`.
     pub fn remove(&mut self, len: usize) -> Callback {
         let start = self.cursor;
         let end = self.cursor + len;

@@ -59,7 +59,7 @@ impl Item {
     pub fn leaf<S, F>(label: S, cb: F) -> Self
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         let label = label.into();
         let cb = Callback::from_fn(cb);
@@ -190,7 +190,7 @@ impl Tree {
     pub fn add_leaf<S, F>(&mut self, label: S, cb: F)
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         let i = self.children.len();
         self.insert_leaf(i, label, cb);
@@ -200,7 +200,7 @@ impl Tree {
     pub fn insert_leaf<S, F>(&mut self, i: usize, label: S, cb: F)
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         let label = label.into();
         self.insert(
@@ -217,7 +217,7 @@ impl Tree {
     pub fn leaf<S, F>(self, label: S, cb: F) -> Self
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.with(|menu| menu.add_leaf(label, cb))
     }

@@ -22,20 +22,20 @@ pub struct CursiveRunner<C> {
 
 impl<C> std::ops::Deref for CursiveRunner<C>
 where
-    C: Borrow<Cursive>,
+    C: Borrow<Cursive<UserData>>,
 {
-    type Target = Cursive;
+    type Target = Cursive<UserData>;
 
-    fn deref(&self) -> &Cursive {
+    fn deref(&self) -> &Cursive<UserData> {
         self.siv.borrow()
     }
 }
 
 impl<C> std::ops::DerefMut for CursiveRunner<C>
 where
-    C: BorrowMut<Cursive>,
+    C: BorrowMut<Cursive<UserData>>,
 {
-    fn deref_mut(&mut self) -> &mut Cursive {
+    fn deref_mut(&mut self) -> &mut Cursive<UserData> {
         self.siv.borrow_mut()
     }
 }
@@ -64,7 +64,7 @@ impl<C> CursiveRunner<C> {
 
 impl<C> CursiveRunner<C>
 where
-    C: BorrowMut<Cursive>,
+    C: BorrowMut<Cursive<UserData>>,
 {
     fn layout(&mut self) {
         let size = self.screen_size();

@@ -12,7 +12,7 @@ struct SharedState<T> {
     selection: usize,
     values: Vec<Rc<T>>,
 
-    on_change: Option<Rc<dyn Fn(&mut Cursive, &T)>>,
+    on_change: Option<Rc<dyn Fn(&mut Cursive<UserData>, &T)>>,
 }
 
 impl<T> SharedState<T> {
@@ -83,7 +83,7 @@ impl<T: 'static> RadioGroup<T> {
     }
 
     /// Sets a callback to be used when the selection changes.
-    pub fn set_on_change<F: 'static + Fn(&mut Cursive, &T)>(
+    pub fn set_on_change<F: 'static + Fn(&mut Cursive<UserData>, &T)>(
         &mut self,
         on_change: F,
     ) {
@@ -93,7 +93,7 @@ impl<T: 'static> RadioGroup<T> {
     /// Sets a callback to be used when the selection changes.
     ///
     /// Chainable variant.
-    pub fn on_change<F: 'static + Fn(&mut Cursive, &T)>(
+    pub fn on_change<F: 'static + Fn(&mut Cursive<UserData>, &T)>(
         self,
         on_change: F,
     ) -> Self {

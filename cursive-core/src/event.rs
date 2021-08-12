@@ -24,7 +24,7 @@ use std::rc::Rc;
 ///
 /// It is meant to be stored in views.
 #[derive(Clone)]
-pub struct Callback(Rc<dyn Fn(&mut Cursive)>);
+pub struct Callback(Rc<dyn Fn(&mut Cursive<UserData>)>);
 // TODO: remove the Box when Box<T: Sized> -> Rc<T> is possible
 
 /// A callback that can be run on `&mut dyn View`.
@@ -182,7 +182,7 @@ impl Callback {
     /// Wraps the given function into a `Callback` object.
     pub fn from_fn<F>(f: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         Callback(Rc::new(move |siv| {
             f(siv);
@@ -194,7 +194,7 @@ impl Callback {
     /// If this methods tries to call itself, nested calls will be no-ops.
     pub fn from_fn_mut<F>(f: F) -> Self
     where
-        F: 'static + FnMut(&mut Cursive),
+        F: 'static + FnMut(&mut Cursive<UserData>),
     {
         Self::from_fn(crate::immut1!(f))
     }
@@ -204,7 +204,7 @@ impl Callback {
     /// After being called once, the callback will become a no-op.
     pub fn from_fn_once<F>(f: F) -> Self
     where
-        F: 'static + FnOnce(&mut Cursive),
+        F: 'static + FnOnce(&mut Cursive<UserData>),
     {
         Self::from_fn_mut(crate::once1!(f))
     }
@@ -216,21 +216,21 @@ impl Callback {
 }
 
 impl Deref for Callback {
-    type Target = dyn Fn(&mut Cursive) + 'static;
+    type Target = dyn Fn(&mut Cursive<UserData>) + 'static;
 
     fn deref(&self) -> &Self::Target {
         &*self.0
     }
 }
 
-impl From<Rc<dyn Fn(&mut Cursive)>> for Callback {
-    fn from(f: Rc<dyn Fn(&mut Cursive)>) -> Self {
+impl From<Rc<dyn Fn(&mut Cursive<UserData>)>> for Callback {
+    fn from(f: Rc<dyn Fn(&mut Cursive<UserData>)>) -> Self {
         Callback(f)
     }
 }
 
-impl From<Box<dyn Fn(&mut Cursive)>> for Callback {
-    fn from(f: Box<dyn Fn(&mut Cursive)>) -> Self {
+impl From<Box<dyn Fn(&mut Cursive<UserData>)>> for Callback {
+    fn from(f: Box<dyn Fn(&mut Cursive<UserData>)>) -> Self {
         Callback(Rc::from(f))
     }
 }
@@ -248,7 +248,7 @@ impl EventResult {
     /// Convenient method to create `Consumed(Some(f))`
     pub fn with_cb<F>(f: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         EventResult::Consumed(Some(Callback::from_fn(f)))
     }
@@ -258,7 +258,7 @@ impl EventResult {
     /// After being called once, the callback will become a no-op.
     pub fn with_cb_once<F>(f: F) -> Self
     where
-        F: 'static + FnOnce(&mut Cursive),
+        F: 'static + FnOnce(&mut Cursive<UserData>),
     {
         EventResult::Consumed(Some(Callback::from_fn_once(f)))
     }
@@ -281,7 +281,7 @@ impl EventResult {
     /// Process this result if it is a callback.
     ///
     /// Does nothing otherwise.
-    pub fn process(self, s: &mut Cursive) {
+    pub fn process(self, s: &mut Cursive<UserData>) {
         if let EventResult::Consumed(Some(cb)) = self {
             cb(s);
         }

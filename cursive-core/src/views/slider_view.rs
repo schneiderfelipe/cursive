@@ -27,8 +27,8 @@ use std::rc::Rc;
 /// ```
 pub struct SliderView {
     orientation: Orientation,
-    on_change: Option<Rc<dyn Fn(&mut Cursive, usize)>>,
-    on_enter: Option<Rc<dyn Fn(&mut Cursive, usize)>>,
+    on_change: Option<Rc<dyn Fn(&mut Cursive<UserData>, usize)>>,
+    on_enter: Option<Rc<dyn Fn(&mut Cursive<UserData>, usize)>>,
     value: usize,
     max_value: usize,
     dragging: bool,
@@ -93,7 +93,7 @@ impl SliderView {
     /// Sets a callback to be called when the slider is moved.
     pub fn on_change<F>(mut self, callback: F) -> Self
     where
-        F: Fn(&mut Cursive, usize) + 'static,
+        F: Fn(&mut Cursive<UserData>, usize) + 'static,
     {
         self.on_change = Some(Rc::new(callback));
         self
@@ -102,7 +102,7 @@ impl SliderView {
     /// Sets a callback to be called when the <Enter> key is pressed.
     pub fn on_enter<F>(mut self, callback: F) -> Self
     where
-        F: Fn(&mut Cursive, usize) + 'static,
+        F: Fn(&mut Cursive<UserData>, usize) + 'static,
     {
         self.on_enter = Some(Rc::new(callback));
         self

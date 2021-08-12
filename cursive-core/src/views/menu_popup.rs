@@ -89,14 +89,20 @@ impl MenuPopup {
     /// (When the user hits <ESC>)
     ///
     /// Chainable variant.
-    pub fn on_dismiss<F: 'static + Fn(&mut Cursive)>(self, f: F) -> Self {
+    pub fn on_dismiss<F: 'static + Fn(&mut Cursive<UserData>)>(
+        self,
+        f: F,
+    ) -> Self {
         self.with(|s| s.set_on_dismiss(f))
     }
 
     /// Sets a callback to be used when this view is actively dismissed.
     ///
     /// (When the user hits <ESC>)
-    pub fn set_on_dismiss<F: 'static + Fn(&mut Cursive)>(&mut self, f: F) {
+    pub fn set_on_dismiss<F: 'static + Fn(&mut Cursive<UserData>)>(
+        &mut self,
+        f: F,
+    ) {
         self.on_dismiss = Some(Callback::from_fn(f));
     }
 
@@ -107,7 +113,10 @@ impl MenuPopup {
     /// Usually used to hide the parent view.
     ///
     /// Chainable variant.
-    pub fn on_action<F: 'static + Fn(&mut Cursive)>(self, f: F) -> Self {
+    pub fn on_action<F: 'static + Fn(&mut Cursive<UserData>)>(
+        self,
+        f: F,
+    ) -> Self {
         self.with(|s| s.set_on_action(f))
     }
 
@@ -116,7 +125,10 @@ impl MenuPopup {
     /// Will also be called if a leaf from a subtree is activated.
     ///
     /// Usually used to hide the parent view.
-    pub fn set_on_action<F: 'static + Fn(&mut Cursive)>(&mut self, f: F) {
+    pub fn set_on_action<F: 'static + Fn(&mut Cursive<UserData>)>(
+        &mut self,
+        f: F,
+    ) {
         self.on_action = Some(Callback::from_fn(f));
     }
 

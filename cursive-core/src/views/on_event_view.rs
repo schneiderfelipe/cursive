@@ -18,11 +18,11 @@ use std::rc::Rc;
 ///
 /// "Inner" callbacks ([`on_event_inner`] and [`on_pre_event_inner`]) are given
 /// a reference to the inner wrapped view (but not to the `Cursive` root). They
-/// can then return another callback, taking only a `&mut Cursive` root as
+/// can then return another callback, taking only a `&mut Cursive<UserData>` root as
 /// argument.
 ///
 /// "Simple" callbacks ([`on_event`] and [`on_pre_event`]) skip this first
-/// phase and are only called with a `&mut Cursive`.
+/// phase and are only called with a `&mut Cursive<UserData>`.
 ///
 /// [`on_event`]: OnEventView::on_event
 /// [`on_pre_event`]: OnEventView::on_pre_event
@@ -107,7 +107,7 @@ impl<T> OnEventView<T> {
     pub fn on_event<F, E>(self, trigger: E, cb: F) -> Self
     where
         E: Into<EventTrigger>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.with(|s| s.set_on_event(trigger, cb))
     }
@@ -120,7 +120,7 @@ impl<T> OnEventView<T> {
     pub fn on_pre_event<F, E>(self, trigger: E, cb: F) -> Self
     where
         E: Into<EventTrigger>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.with(|s| s.set_on_pre_event(trigger, cb))
     }
@@ -189,7 +189,7 @@ impl<T> OnEventView<T> {
     pub fn set_on_event<F, E>(&mut self, trigger: E, cb: F)
     where
         E: Into<EventTrigger>,
-        F: Fn(&mut Cursive) + 'static,
+        F: Fn(&mut Cursive<UserData>) + 'static,
     {
         let cb = Callback::from_fn(cb);
         let action = move |_: &mut T, _: &Event| {
@@ -205,7 +205,7 @@ impl<T> OnEventView<T> {
     pub fn set_on_pre_event<F, E>(&mut self, trigger: E, cb: F)
     where
         E: Into<EventTrigger>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         let cb = Callback::from_fn(cb);
         // We want to clone the Callback every time we call the closure

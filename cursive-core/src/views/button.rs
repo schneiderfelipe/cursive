@@ -35,7 +35,7 @@ impl Button {
     /// Creates a new button with the given content and callback.
     pub fn new<F, S>(label: S, cb: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
         S: Into<String>,
     {
         let label = label.into();
@@ -53,7 +53,7 @@ impl Button {
     /// ```
     pub fn new_raw<F, S: Into<String>>(label: S, cb: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         Button {
             label: label.into(),
@@ -69,7 +69,7 @@ impl Button {
     /// Replaces the previous callback.
     pub fn set_callback<F>(&mut self, cb: F)
     where
-        F: Fn(&mut Cursive) + 'static,
+        F: Fn(&mut Cursive<UserData>) + 'static,
     {
         self.callback = Callback::from_fn(cb);
     }

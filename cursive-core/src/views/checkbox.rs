@@ -21,7 +21,7 @@ pub struct Checkbox {
     checked: bool,
     enabled: bool,
 
-    on_change: Option<Rc<dyn Fn(&mut Cursive, bool)>>,
+    on_change: Option<Rc<dyn Fn(&mut Cursive<UserData>, bool)>>,
 }
 
 new_default!(Checkbox);
@@ -39,7 +39,7 @@ impl Checkbox {
     }
 
     /// Sets a callback to be used when the state changes.
-    pub fn set_on_change<F: 'static + Fn(&mut Cursive, bool)>(
+    pub fn set_on_change<F: 'static + Fn(&mut Cursive<UserData>, bool)>(
         &mut self,
         on_change: F,
     ) {
@@ -49,7 +49,7 @@ impl Checkbox {
     /// Sets a callback to be used when the state changes.
     ///
     /// Chainable variant.
-    pub fn on_change<F: 'static + Fn(&mut Cursive, bool)>(
+    pub fn on_change<F: 'static + Fn(&mut Cursive<UserData>, bool)>(
         self,
         on_change: F,
     ) -> Self {

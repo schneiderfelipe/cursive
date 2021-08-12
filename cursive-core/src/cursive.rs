@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::num::NonZeroU32;
 #[cfg(feature = "toml")]
 use std::path::Path;
@@ -28,7 +27,8 @@ type RootView = views::OnEventView<views::ScreensView<views::StackView>>;
 /// then start the event loop with `run()`.
 ///
 /// It uses a list of screen, with one screen active at a time.
-pub struct Cursive {
+pub struct Cursive<UserData> {
+    // TODO: `dyn Any` is default for UserData
     theme: theme::Theme,
 
     // The main view
@@ -41,13 +41,13 @@ pub struct Cursive {
     running: bool,
 
     // Handle asynchronous callbacks
-    cb_source: Receiver<Box<dyn FnOnce(&mut Cursive) + Send>>,
-    cb_sink: Sender<Box<dyn FnOnce(&mut Cursive) + Send>>,
+    cb_source: Receiver<Box<dyn FnOnce(&mut Cursive<UserData>) + Send>>,
+    cb_sink: Sender<Box<dyn FnOnce(&mut Cursive<UserData>) + Send>>,
 
     last_size: Vec2,
 
     // User-provided data.
-    user_data: Box<dyn Any>,
+    user_data: Box<UserData>,
 
     // Handle auto-refresh when no event is received.
     fps: Option<NonZeroU32>,
@@ -65,11 +65,11 @@ pub type ScreenId = usize;
 /// In some case [`send_wrapper`] may help you work around that.
 ///
 /// [`send_wrapper`]: https://crates.io/crates/send_wrapper
-pub type CbSink = Sender<Box<dyn FnOnce(&mut Cursive) + Send>>;
+pub type CbSink = Sender<Box<dyn FnOnce(&mut Cursive<UserData>) + Send>>;
 
-new_default!(Cursive);
+new_default!(Cursive<UserData>);
 
-impl Cursive {
+impl<UserData> Cursive<UserData> {
     /// Creates a new Cursive root, and initialize the back-end.
     ///
     /// You probably don't want to use this function directly, unless you're
@@ -94,7 +94,7 @@ impl Cursive {
             cb_source,
             cb_sink,
             fps: None,
-            user_data: Box::new(()),
+            user_data: Box::new(()), // TODO: How to proceed with UserData? Require default?
         };
         cursive.reset_default_callbacks();
 
@@ -147,7 +147,7 @@ impl Cursive {
     /// Sets some data to be stored in Cursive.
     ///
     /// It can later on be accessed with `Cursive::user_data()`
-    pub fn set_user_data<T: Any>(&mut self, user_data: T) {
+    pub fn set_user_data(&mut self, user_data: UserData) {
         self.user_data = Box::new(user_data);
     }
 
@@ -157,8 +157,8 @@ impl Cursive {
     /// reference to it.
     ///
     /// If nothing was set or if the type is different, returns `None`.
-    pub fn user_data<T: Any>(&mut self) -> Option<&mut T> {
-        self.user_data.downcast_mut()
+    pub fn user_data(&mut self) -> Option<&mut UserData> {
+        self.user_data.downcast_mut() // TODO: `downcast_mut` may be removed?
     }
 
     /// Attemps to take by value the current user-data.
@@ -188,7 +188,7 @@ impl Cursive {
     /// // At this point the user data was removed and is no longer available.
     /// assert_eq!(siv.user_data::<Vec<i32>>(), None);
     /// ```
-    pub fn take_user_data<T: Any>(&mut self) -> Option<T> {
+    pub fn take_user_data(&mut self) -> Option<UserData> {
         // Start by taking the user data and replacing it with a dummy.
         let user_data = std::mem::replace(&mut self.user_data, Box::new(()));
 
@@ -211,10 +211,9 @@ impl Cursive {
     /// will be run.
     ///
     /// Otherwise, the result will be returned.
-    pub fn with_user_data<F, T, R>(&mut self, f: F) -> Option<R>
+    pub fn with_user_data<F, R>(&mut self, f: F) -> Option<R>
     where
-        F: FnOnce(&mut T) -> R,
-        T: Any,
+        F: FnOnce(&mut UserData) -> R,
     {
         self.user_data().map(f)
     }
@@ -656,7 +655,7 @@ impl Cursive {
     /// ```
     pub fn add_global_callback<F, E: Into<Event>>(&mut self, event: E, cb: F)
     where
-        F: FnMut(&mut Cursive) + 'static,
+        F: FnMut(&mut Cursive<UserData>) + 'static,
     {
         self.set_on_post_event(event.into(), cb);
     }
@@ -666,7 +665,7 @@ impl Cursive {
     /// This is the same as `add_global_callback`, but can register any `EventTrigger`.
     pub fn set_on_post_event<F, E>(&mut self, trigger: E, cb: F)
     where
-        F: FnMut(&mut Cursive) + 'static,
+        F: FnMut(&mut Cursive<UserData>) + 'static,
         E: Into<crate::event::EventTrigger>,
     {
         self.root.set_on_event(trigger, crate::immut1!(cb));
@@ -681,7 +680,7 @@ impl Cursive {
     /// these events.
     pub fn set_on_pre_event<F, E>(&mut self, trigger: E, cb: F)
     where
-        F: FnMut(&mut Cursive) + 'static,
+        F: FnMut(&mut Cursive<UserData>) + 'static,
         E: Into<crate::event::EventTrigger>,
     {
         self.root.set_on_pre_event(trigger, crate::immut1!(cb));
@@ -722,7 +721,7 @@ impl Cursive {
     /// See also [`Cursive::add_global_callback`].
     pub fn set_global_callback<F, E: Into<Event>>(&mut self, event: E, cb: F)
     where
-        F: FnMut(&mut Cursive) + 'static,
+        F: FnMut(&mut Cursive<UserData>) + 'static,
     {
         let event = event.into();
         self.clear_global_callbacks(event.clone());
@@ -945,7 +944,7 @@ impl Cursive {
     /// * Callback sink
     ///
     /// After calling this, the cursive object will be as if newly created.
-    pub fn dump(&mut self) -> crate::Dump {
+    pub fn dump(&mut self) -> crate::Dump<UserData> {
         let (cb_sink, cb_source) = crossbeam_channel::unbounded();
         let root = views::OnEventView::new(views::ScreensView::single_screen(
             views::StackView::new(),
@@ -971,7 +970,7 @@ impl Cursive {
     /// * User Data will be replaced.
     /// * The callback channel will be replaced - any previous call to
     ///   `cb_sink` on this instance will be disconnected.
-    pub fn restore(&mut self, dump: Dump) {
+    pub fn restore(&mut self, dump: Dump<UserData>) {
         self.cb_sink = dump.cb_sink;
         self.cb_source = dump.cb_source;
         self.fps = dump.fps;

@@ -32,7 +32,7 @@ struct ChildButton {
 impl ChildButton {
     pub fn new<F, S: Into<String>>(label: S, cb: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         ChildButton {
             button: LastSizeView::new(Button::new(label, cb)),
@@ -209,7 +209,7 @@ impl Dialog {
     /// Consumes and returns self for easy chaining.
     pub fn button<F, S: Into<String>>(self, label: S, cb: F) -> Self
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.with(|s| s.add_button(label, cb))
     }
@@ -217,7 +217,7 @@ impl Dialog {
     /// Adds a button to the dialog with the given label and callback.
     pub fn add_button<F, S: Into<String>>(&mut self, label: S, cb: F)
     where
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.buttons.push(ChildButton::new(label, cb));
         self.invalidate();

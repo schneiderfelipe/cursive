@@ -111,7 +111,7 @@ impl Menubar {
     pub fn add_leaf<S, F>(&mut self, title: S, cb: F) -> &mut Self
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         let i = self.root.len();
         self.insert_leaf(i, title, cb)
@@ -145,7 +145,7 @@ impl Menubar {
     pub fn insert_leaf<S, F>(&mut self, i: usize, title: S, cb: F) -> &mut Self
     where
         S: Into<String>,
-        F: 'static + Fn(&mut Cursive),
+        F: 'static + Fn(&mut Cursive<UserData>),
     {
         self.root.insert_leaf(i, title, cb);
         self
@@ -238,7 +238,7 @@ impl Menubar {
     }
 }
 
-fn show_child(s: &mut Cursive, offset: Vec2, menu: Rc<menu::Tree>) {
+fn show_child(s: &mut Cursive<UserData>, offset: Vec2, menu: Rc<menu::Tree>) {
     // Adds a new layer located near the item title with the menu popup.
     // Also adds two key callbacks on this new view, to handle `left` and
     // `right` key presses.

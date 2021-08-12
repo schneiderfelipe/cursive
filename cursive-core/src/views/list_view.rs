@@ -42,7 +42,7 @@ pub struct ListView {
     // Which child is focused? Should index into the `children` list.
     focus: usize,
     // This callback is called when the selection is changed.
-    on_select: Option<Rc<dyn Fn(&mut Cursive, &String)>>,
+    on_select: Option<Rc<dyn Fn(&mut Cursive<UserData>, &String)>>,
 }
 
 // Implement `Default` around `ListView::new`
@@ -147,7 +147,7 @@ impl ListView {
     /// Sets a callback to be used when an item is selected.
     pub fn set_on_select<F>(&mut self, cb: F)
     where
-        F: Fn(&mut Cursive, &String) + 'static,
+        F: Fn(&mut Cursive<UserData>, &String) + 'static,
     {
         self.on_select = Some(Rc::new(cb));
     }
@@ -157,7 +157,7 @@ impl ListView {
     /// Chainable variant.
     pub fn on_select<F>(self, cb: F) -> Self
     where
-        F: Fn(&mut Cursive, &String) + 'static,
+        F: Fn(&mut Cursive<UserData>, &String) + 'static,
     {
         self.with(|s| s.set_on_select(cb))
     }

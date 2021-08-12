@@ -211,7 +211,7 @@ impl<V> ScrollView<V> {
     /// This lets the callback access the `ScrollView` itself (and its child)
     /// if necessary.
     ///
-    /// If you just need to run a callback on `&mut Cursive`, consider
+    /// If you just need to run a callback on `&mut Cursive<UserData>`, consider
     /// `set_on_scroll`.
     pub fn set_on_scroll_inner<F>(&mut self, on_scroll: F)
     where
@@ -224,9 +224,9 @@ impl<V> ScrollView<V> {
     /// Sets a callback to be run whenever scrolling happens.
     pub fn set_on_scroll<F>(&mut self, on_scroll: F)
     where
-        F: FnMut(&mut Cursive, Rect) + 'static,
+        F: FnMut(&mut Cursive<UserData>, Rect) + 'static,
     {
-        let on_scroll: Rc<dyn Fn(&mut Cursive, Rect)> =
+        let on_scroll: Rc<dyn Fn(&mut Cursive<UserData>, Rect)> =
             std::rc::Rc::new(immut2!(on_scroll));
 
         self.set_on_scroll_inner(move |_, rect| {
@@ -271,7 +271,7 @@ impl<V> ScrollView<V> {
     /// Sets a callback to be run whenever the scroll offset changes.
     pub fn set_on_scroll_change<F>(&mut self, on_scroll: F)
     where
-        F: FnMut(&mut Cursive, Rect) + 'static,
+        F: FnMut(&mut Cursive<UserData>, Rect) + 'static,
         V: 'static,
     {
         self.set_on_scroll(Self::skip_unchanged(on_scroll, || ()));
@@ -282,7 +282,7 @@ impl<V> ScrollView<V> {
     /// This lets the callback access the `ScrollView` itself (and its child)
     /// if necessary.
     ///
-    /// If you just need to run a callback on `&mut Cursive`, consider
+    /// If you just need to run a callback on `&mut Cursive<UserData>`, consider
     /// `set_on_scroll`.
     ///
     /// Chainable variant.
@@ -298,7 +298,7 @@ impl<V> ScrollView<V> {
     /// Chainable variant.
     pub fn on_scroll<F>(self, on_scroll: F) -> Self
     where
-        F: FnMut(&mut crate::Cursive, Rect) + 'static,
+        F: FnMut(&mut crate::Cursive<UserData>, Rect) + 'static,
     {
         self.with(|s| s.set_on_scroll(on_scroll))
     }
